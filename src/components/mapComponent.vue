@@ -17,29 +17,20 @@
                 :attribution="attribution"
             />
             <l-marker v-if="coordsPopup" ref="onclickmarker" :lat-lng="coordsPopup" >
-                <l-popup>
-                  <v-progress-circular
-                  v-if="currentData === null"
+
+              <l-popup v-if="popUpLoading">
+                <v-progress-circular
                     indeterminate
                     color="primary"
                   ></v-progress-circular>
+              </l-popup>
 
-                    <custom-spark-line-component v-if="currentDataForViewing" :chartData="currentDataForViewing.lineChartData"></custom-spark-line-component>
+              <l-popup v-if="currentDataForViewing">
+                <custom-spark-line-component v-if="currentDataForViewing" :chartData="currentDataForViewing.lineChartData"></custom-spark-line-component>
 
-                    <custom-data-table-component v-if="currentDataForViewing" :dataTableItems="currentDataForViewing.items"></custom-data-table-component>
+                <custom-data-table-component v-if="currentDataForViewing" :dataTableItems="currentDataForViewing.items"></custom-data-table-component>
+              </l-popup>
 
-                    <!-- <v-data-table v-if="currentDataForViewing"
-                        :headers="dataTableValues.headers"
-                        :items="dataTableValues.items"
-                        :items-per-page="4"
-                        class="elevation-1"
-                        :footer-props="{
-                          disableItemsPerPage: true,
-                        }"
-                    ></v-data-table> -->
-
-
-                </l-popup>
             </l-marker>
         </l-map>
         <!-- <custom-data-presentation v-if="currentData" :weatherData="currentData"></custom-data-presentation> -->
@@ -74,11 +65,13 @@ export default {
       center: L.latLng(40.6401, 22.9444),
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       attribution:'&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-      coordsPopup: L.latLng(40.6401, 22.9444),
+      // coordsPopup: L.latLng(40.6401, 22.9444),
+      coordsPopup: null,
       currentZoom: 11.5,
       currentCenter: L.latLng(40.6401, 22.9444),
       currentData: null,
       currentDataForViewing: null,
+      popUpLoading: false,
       mapOptions: {
         zoomSnap: 0.5
       },
@@ -116,9 +109,6 @@ export default {
         mapClick(e){
             this.currentData = null;
             this.currentDataForViewing = null;
-             this.$nextTick(() => {
-                this.$refs.onclickmarker.mapObject.openPopup();
-            });
             this.coordsPopup = e.latlng;
             this.currentCenter = e.latlng;
             let from_date = this.isotodate(new Date(Date.now() + (60 * 60 * 1000)));
@@ -131,20 +121,29 @@ export default {
               to_date: to_date
             };
 
-            // live api call
-            // this.api.getWeatherMeteoHourly(objForApi).then((dataResult) => {
-            //   this.currentData = dataResult.rawData;
-            //   this.currentDataForViewing = dataResult.dataForViewing;
-            //   this.value = this.currentDataForViewing.lineChartData;
-            //   console.log(this.currentDataForViewing)
-            //   this.dataTableValues.items = this.currentDataForViewing.items
-            // });
+            this.popUpLoading = true;
+            this.$nextTick(() => {
+              this.$refs.onclickmarker.mapObject.openPopup();
+            });
 
-            // mock api call
-            let dataResult = this.api.getMockAnswer(objForApi);
-            this.currentData = dataResult.rawData;
-            this.currentDataForViewing = dataResult.dataForViewing;
-            this.value = this.currentDataForViewing.lineChartData;
+            // live api call
+            this.api.getWeatherMeteoHourly(objForApi).then((dataResult) => {
+              this.popUpLoading = false;
+              this.currentData = dataResult.rawData;
+              this.currentDataForViewing = dataResult.dataForViewing;
+              this.$nextTick(() => {
+                this.$refs.onclickmarker.mapObject.openPopup();
+              });
+            });
+
+            // // mock api call
+            // let dataResult = this.api.getMockAnswer(objForApi);
+            // this.currentData = dataResult.rawData;
+            // this.currentDataForViewing = dataResult.dataForViewing;
+            // this.value = this.currentDataForViewing.lineChartData;
+            // this.$nextTick(() => {
+            //   this.$refs.onclickmarker.mapObject.openPopup();
+            // });
         }
     }
   }

@@ -13,6 +13,7 @@
                 :type="type"
                 :auto-line-width="autoLineWidth"
                 auto-draw
+                label-size="10"
             >
             <template v-slot:label="item">
                 {{ Math.floor(item.value) }}
@@ -36,7 +37,7 @@ export default {
   components: {
   },
   data: () => ({
-    width: 2,
+    width: 3,
       radius: 10,
       padding: 8,
       lineCap: 'round',
@@ -49,9 +50,15 @@ export default {
       autoLineWidth: false,
   }),
   created(){
-    this.value = this.chartData
+    this.value = this.chartData;
   },
   mounted(){
   }
 };
 </script>
+
+<style>
+/* text { 
+   font-size: 10  px !important; 
+} */
+</style>

@@ -46,8 +46,7 @@ export default {
     
   }),
   methods:{
-    // return the date string as we like it
-        
+ 
   }
 };
 </script>
