@@ -36,15 +36,12 @@
 
             </l-marker>
         </l-map>
-        <!-- <custom-data-presentation v-if="currentData" :weatherData="currentData"></custom-data-presentation> -->
   </v-container>
 </template>
 
 <script>
 import * as L from 'leaflet';
 import { LMap, LTileLayer, LMarker, LPopup } from 'vue2-leaflet';
-// import customPopUp from './customPopUp.vue';
-// import customDataPresentation from './customDataPresentation.vue'
 import customSparkLineComponent from './customSparkLineComponent.vue'
 import customDataTableComponent from './customDataTableComponent.vue'
 import errorComponent from './errorComponent.vue'
@@ -59,8 +56,6 @@ export default {
         customSparkLineComponent,
         customDataTableComponent,
         errorComponent
-        // customPopUp,
-        // customDataPresentation
     },
     props: ['api'],
     inject: ['isotodate'],
@@ -165,8 +160,5 @@ export default {
 </script>
 
 <style>
-/* .leaflet-popup-content {
-    width: auto;
-    height: auto;
-} */
+
 </style>
