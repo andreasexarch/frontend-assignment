@@ -8,10 +8,11 @@
             </v-col>
             </v-row>
             <v-divider></v-divider>
-            <v-row v-for="item in itemsPerPageContent[currentPage]" :key="item.date">
+            <v-row no-gutters v-for="item in itemsPerPageContent[currentPage]" :key="item.date">
                 <v-col>{{ item.date }}</v-col>
-                <v-col>{{ item.temp }}</v-col>
-                <v-col>{{ item.rh2m }}</v-col>
+                <!-- <v-col>{{ item.temp }}</v-col> -->
+                <v-col><v-chip :color="chipColorsTemperature(item.rawData.temp)">{{ item.temp }}</v-chip></v-col>
+                <v-col><v-chip :color="chipColorsHumidity(item.rawData.rh2m)">{{ item.rh2m }}</v-chip></v-col>
             </v-row>
             <v-divider></v-divider>
             <v-row justify="space-between">
@@ -109,6 +110,26 @@ export default {
                 this.itemsPerPageContent[pageToPush].push(item)
             });
         },
+        chipColorsTemperature(value){
+            console.log(value)
+            if (value < 10){
+                return 'green'
+            }else if (value >= 10 && value < 25){
+                return 'yellow'
+            }else{
+                return 'red'
+            }
+        },
+        chipColorsHumidity(value){
+            console.log(value)
+            if (value < 40){
+                return 'green'
+            }else if (value >= 40 && value < 70){
+                return 'yellow'
+            }else{
+                return 'red'
+            }
+        }
     },
     computed:{
         prevBtnDisabled: function(){
