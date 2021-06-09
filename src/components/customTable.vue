@@ -111,7 +111,6 @@ export default {
             });
         },
         chipColorsTemperature(value){
-            console.log(value)
             if (value < 10){
                 return 'green'
             }else if (value >= 10 && value < 25){
@@ -121,7 +120,6 @@ export default {
             }
         },
         chipColorsHumidity(value){
-            console.log(value)
             if (value < 40){
                 return 'green'
             }else if (value >= 40 && value < 70){
