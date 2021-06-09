@@ -1,7 +1,8 @@
 # frontend-assignment
 ## Overview
 ```
-Small web application that lets the user navigate on a map and getting weather forecasts by click anywhere on it. Forecasts are provided by draxis weather API.
+Small web application that lets the user navigate on a map and getting weather forecasts
+by click anywhere on it. Forecasts are provided by draxis weather API.
 
 The technology stack consists of:
 Vuejs (js framework)
