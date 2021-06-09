@@ -1,6 +1,10 @@
-const fetch = require("node-fetch");
 const axios = require("axios");
 
+/*
+    Class that implements the api calls to api.draxis.gr and also contains
+    parser function in order to work on the responses
+
+*/
 export class draxisApi{
     constructor(token, proxy = ''){
         this.token = token;
@@ -21,12 +25,14 @@ export class draxisApi{
                     rawData: myVariablesAnswer,
                     dataForViewing: result
                 });
+            }).catch(error => {
+                reject(error);
             });
         });
     }
 
     parseWeatherMeteoHourlyResponse(data){
-        // set data for temperature data table
+        // set data for temperature data table and line chart
         let finalDataObj = {
             items: [],
             lineChartData: Object.values(data.temperature2m.data)
@@ -34,9 +40,9 @@ export class draxisApi{
         Object.keys(data.temperature2m.data).forEach(header => {
             let timeObj = new Date(Date.parse(header));
             finalDataObj.items.push({
-            date: timeObj.toDateString() + ' ' + timeObj.getHours() + ':00',
-            temp: Math.round(data.temperature2m.data[header]) + ' ' + data.temperature2m.unit,
-            rh2m: Math.round(data.rh2m.data[header]) + ' ' + data.rh2m.unit
+                date: timeObj.toDateString() + ' ' + timeObj.getHours() + ':00',
+                temp: Math.round(data.temperature2m.data[header]) + ' ' + data.temperature2m.unit,
+                rh2m: Math.round(data.rh2m.data[header]) + ' ' + data.rh2m.unit
             })
         })
         return finalDataObj;

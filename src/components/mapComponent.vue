@@ -1,13 +1,12 @@
 <template>
-  <v-container>
-    <div style="height: 1000px; width: 100%">
+  <v-container fluid style="height: 100vh;">
         <l-map
             v-if="showMap"
             ref="mymap"
             :zoom="zoom"
             :center="center"
             :options="mapOptions"
-            style="height: 80%"
+            style="height: 87%"
             @update:center="centerUpdate"
             @update:zoom="zoomUpdate"
             @click="mapClick"
@@ -25,7 +24,11 @@
                   ></v-progress-circular>
               </l-popup>
 
-              <l-popup v-if="currentDataForViewing">
+              <l-popup v-if="errorShowing">
+                <error-component :errorMsg="errorMsg"></error-component>
+              </l-popup>
+
+              <l-popup v-if="currentDataForViewing" >
                 <custom-spark-line-component v-if="currentDataForViewing" :chartData="currentDataForViewing.lineChartData"></custom-spark-line-component>
 
                 <custom-data-table-component v-if="currentDataForViewing" :dataTableItems="currentDataForViewing.items"></custom-data-table-component>
@@ -34,7 +37,6 @@
             </l-marker>
         </l-map>
         <!-- <custom-data-presentation v-if="currentData" :weatherData="currentData"></custom-data-presentation> -->
-    </div>
   </v-container>
 </template>
 
@@ -45,6 +47,7 @@ import { LMap, LTileLayer, LMarker, LPopup } from 'vue2-leaflet';
 // import customDataPresentation from './customDataPresentation.vue'
 import customSparkLineComponent from './customSparkLineComponent.vue'
 import customDataTableComponent from './customDataTableComponent.vue'
+import errorComponent from './errorComponent.vue'
 
 export default {
     name: 'mapComponent',
@@ -54,7 +57,8 @@ export default {
         LMarker,
         LPopup,
         customSparkLineComponent,
-        customDataTableComponent
+        customDataTableComponent,
+        errorComponent
         // customPopUp,
         // customDataPresentation
     },
@@ -72,6 +76,8 @@ export default {
       currentData: null,
       currentDataForViewing: null,
       popUpLoading: false,
+      errorShowing: false,
+      errorMsg: 'Our digital pandas are trying to solve it!',
       mapOptions: {
         zoomSnap: 0.5
       },
@@ -113,6 +119,7 @@ export default {
             this.currentCenter = e.latlng;
             let from_date = this.isotodate(new Date(Date.now() + (60 * 60 * 1000)));
             let to_date = this.isotodate(new Date(new Date().setDate(new Date().getDate() + 1)));
+
             // getting obj for api ready
             let objForApi = {
               lat: e.latlng.lat,
@@ -121,6 +128,7 @@ export default {
               to_date: to_date
             };
 
+            this.errorShowing = false;
             this.popUpLoading = true;
             this.$nextTick(() => {
               this.$refs.onclickmarker.mapObject.openPopup();
@@ -131,6 +139,13 @@ export default {
               this.popUpLoading = false;
               this.currentData = dataResult.rawData;
               this.currentDataForViewing = dataResult.dataForViewing;
+              this.$nextTick(() => {
+                this.$refs.onclickmarker.mapObject.openPopup();
+              });
+            }).catch(error => {
+              this.errorMsg = '(' + error.response.status + ') ' + error.response.data;
+              this.popUpLoading = false;
+              this.errorShowing = true;
               this.$nextTick(() => {
                 this.$refs.onclickmarker.mapObject.openPopup();
               });

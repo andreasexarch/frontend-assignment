@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app style="background-color: #cecfd0;">
     <v-app-bar
       app
       color="primary"
@@ -50,3 +50,10 @@ export default {
   }
 };
 </script>
+
+<style >
+body {
+    overflow: hidden;
+    height: 100vh;
+}
+</style>
