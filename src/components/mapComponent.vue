@@ -28,10 +28,15 @@
                 <error-component :errorMsg="errorMsg"></error-component>
               </l-popup>
 
-              <l-popup v-if="currentDataForViewing" >
+              <!-- <l-popup v-if="currentDataForViewing" >
                 <custom-spark-line-component v-if="currentDataForViewing" :chartData="currentDataForViewing.lineChartData"></custom-spark-line-component>
 
                 <custom-data-table-component v-if="currentDataForViewing" :dataTableItems="currentDataForViewing.items"></custom-data-table-component>
+              </l-popup> -->
+
+              <l-popup v-if="currentDataForViewing" >
+                <custom-spark-line-component v-if="currentDataForViewing" :chartData="currentDataForViewing.dataForViewing.lineChartData"></custom-spark-line-component>
+                <custom-table :items="currentDataForViewing" :tableOptions="{ itemsPerPage: 4 }"></custom-table>
               </l-popup>
 
             </l-marker>
@@ -43,8 +48,9 @@
 import * as L from 'leaflet';
 import { LMap, LTileLayer, LMarker, LPopup } from 'vue2-leaflet';
 import customSparkLineComponent from './customSparkLineComponent.vue'
-import customDataTableComponent from './customDataTableComponent.vue'
+// import customDataTableComponent from './customDataTableComponent.vue'
 import errorComponent from './errorComponent.vue'
+import customTable from './customTable.vue'
 
 export default {
     name: 'mapComponent',
@@ -54,8 +60,9 @@ export default {
         LMarker,
         LPopup,
         customSparkLineComponent,
-        customDataTableComponent,
-        errorComponent
+        // customDataTableComponent,
+        errorComponent,
+        customTable
     },
     props: ['api'],
     inject: ['isotodate'],
@@ -133,7 +140,7 @@ export default {
             this.api.getWeatherMeteoHourly(objForApi).then((dataResult) => {
               this.popUpLoading = false;
               this.currentData = dataResult.rawData;
-              this.currentDataForViewing = dataResult.dataForViewing;
+              this.currentDataForViewing = dataResult;
               this.$nextTick(() => {
                 this.$refs.onclickmarker.mapObject.openPopup();
               });
@@ -149,7 +156,7 @@ export default {
             // // mock api call
             // let dataResult = this.api.getMockAnswer(objForApi);
             // this.currentData = dataResult.rawData;
-            // this.currentDataForViewing = dataResult.dataForViewing;
+            // this.currentDataForViewing = dataResult;
             // this.value = this.currentDataForViewing.lineChartData;
             // this.$nextTick(() => {
             //   this.$refs.onclickmarker.mapObject.openPopup();

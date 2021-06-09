@@ -38,11 +38,15 @@ export class draxisApi{
             lineChartData: Object.values(data.temperature2m.data)
         };
         Object.keys(data.temperature2m.data).forEach(header => {
-            let timeObj = new Date(Date.parse(header));
+            let timeObj = new Date(Date.parse(header.slice(0, header.indexOf('+'))));
             finalDataObj.items.push({
                 date: timeObj.toDateString() + ' ' + timeObj.getHours() + ':00',
                 temp: Math.round(data.temperature2m.data[header]) + ' ' + data.temperature2m.unit,
-                rh2m: Math.round(data.rh2m.data[header]) + ' ' + data.rh2m.unit
+                rh2m: Math.round(data.rh2m.data[header]) + ' ' + data.rh2m.unit,
+                rawData: {
+                    temp: Math.round(data.temperature2m.data[header]),
+                    rh2m: Math.round(data.rh2m.data[header])         
+                }
             })
         })
         return finalDataObj;
