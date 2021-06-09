@@ -32,7 +32,7 @@ export default {
           value: 'temp'
         },
         {
-          text: 'rh2m',
+          text: 'Humidity',
           align: 'start',
           sortable: true,
           value: 'rh2m'
