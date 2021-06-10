@@ -1,15 +1,14 @@
 <template>
   <v-container fluid style="height: 100vh;">
         <l-map
-            v-if="showMap"
             ref="mymap"
             :zoom="zoom"
             :center="center"
             :options="mapOptions"
             style="height: 87%"
-            @update:center="centerUpdate"
-            @update:zoom="zoomUpdate"
             @click="mapClick"
+            @update:zoom="zoomUpdate"
+            v-resize="onResize"
         >
             <l-tile-layer
                 :url="url"
@@ -17,24 +16,25 @@
             />
             <l-marker v-if="coordsPopup" ref="onclickmarker" :lat-lng="coordsPopup" >
 
-              <l-popup v-if="popUpLoading">
-                <v-progress-circular
+              <l-popup v-if="popUpLoading" >
+                  <v-progress-circular
+                    :size="100"
                     indeterminate
                     color="primary"
+                    style="width: 100%"
                   ></v-progress-circular>
+                
+                  <!-- <v-progress-linear
+                    indeterminate
+                    color="yellow darken-2"
+                  ></v-progress-linear> -->
               </l-popup>
 
               <l-popup v-if="errorShowing">
                 <error-component :errorMsg="errorMsg"></error-component>
               </l-popup>
 
-              <!-- <l-popup v-if="currentDataForViewing" >
-                <custom-spark-line-component v-if="currentDataForViewing" :chartData="currentDataForViewing.lineChartData"></custom-spark-line-component>
-
-                <custom-data-table-component v-if="currentDataForViewing" :dataTableItems="currentDataForViewing.items"></custom-data-table-component>
-              </l-popup> -->
-
-              <l-popup v-if="currentDataForViewing" >
+              <l-popup v-if="currentDataForViewing">
                 <custom-spark-line-component v-if="currentDataForViewing" :chartData="currentDataForViewing.dataForViewing.lineChartData"></custom-spark-line-component>
                 <custom-table :items="currentDataForViewing" :tableOptions="{ itemsPerPage: 4 }"></custom-table>
               </l-popup>
@@ -48,7 +48,6 @@
 import * as L from 'leaflet';
 import { LMap, LTileLayer, LMarker, LPopup } from 'vue2-leaflet';
 import customSparkLineComponent from './customSparkLineComponent.vue'
-// import customDataTableComponent from './customDataTableComponent.vue'
 import errorComponent from './errorComponent.vue'
 import customTable from './customTable.vue'
 
@@ -60,36 +59,38 @@ export default {
         LMarker,
         LPopup,
         customSparkLineComponent,
-        // customDataTableComponent,
         errorComponent,
         customTable
     },
-    props: ['api'],
+    props: {
+      api: {
+        type: Object,
+        required: true
+      }
+    },
     inject: ['isotodate'],
-    data: () => ({
-      zoom: 13,
-      center: L.latLng(40.6401, 22.9444),
-      url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      attribution:'&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-      // coordsPopup: L.latLng(40.6401, 22.9444),
-      coordsPopup: null,
-      currentZoom: 11.5,
-      currentCenter: L.latLng(40.6401, 22.9444),
-      currentData: null,
-      currentDataForViewing: null,
-      popUpLoading: false,
-      errorShowing: false,
-      errorMsg: 'Our digital pandas are trying to solve it!',
-      mapOptions: {
-        zoomSnap: 0.5
-      },
-      showMap: true,
-      customMarkerIcon: L.icon({
-        iconUrl: "https://toppng.com/uploads/preview/map-marker-icon-600x-map-marker-11562939743ayfahlvygl.png",
-        iconSize: [32, 37],
-        // iconAnchor: [16, 37]
-      })
-    }),
+    data: function() {
+      return {
+        zoom: 13,
+        currentZoom: 11.5,
+        center: L.latLng(40.6401, 22.9444),
+        url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        attribution:'&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+        // coordsPopup: L.latLng(40.6401, 22.9444),
+        coordsPopup: null,
+        currentDataForViewing: null,
+        popUpLoading: false,
+        errorShowing: false,
+        errorMsg: 'Our digital pandas are trying to solve it!',
+        mapOptions: {
+          zoomSnap: 0.5
+        },
+        customMarkerIcon: L.icon({
+          iconUrl: "https://toppng.com/uploads/preview/map-marker-icon-600x-map-marker-11562939743ayfahlvygl.png",
+          iconSize: [32, 37],
+        })
+      }
+    },
     created(){
       // fix for leaflet marker START
       delete L.Icon.Default.prototype._getIconUrl;
@@ -99,26 +100,29 @@ export default {
         shadowUrl: require("leaflet/dist/images/marker-shadow.png")
       });
       // fix for leaflet marker END
+      
     },
     mounted(){
-        // automatic map click at start
-        // this.$nextTick(() => {
-        //         this.mapClick({'latlng': L.latLng(40.6401, 22.9444)});
-        // }) 
+      // dispatch map object in store
+      this.$store.dispatch('action_set_new_mapObject', this.$refs.mymap)
     },
     methods:{
+        onResize(){
+          console.log('resize happens!');
+          // this.center = this.coordsPopup;
+          if (this.coordsPopup){
+            this.$refs.mymap.mapObject.setView(this.coordsPopup, this.currentZoom);
+          }
+        },
         zoomUpdate(zoom) {
             this.currentZoom = zoom;
-        },
-        centerUpdate(center) {
-            this.currentCenter = center;
         },
         // click on the map, triggers the whole procedure
         mapClick(e){
             this.currentData = null;
             this.currentDataForViewing = null;
             this.coordsPopup = e.latlng;
-            this.currentCenter = e.latlng;
+            this.center = e.latlng;
             let from_date = this.isotodate(new Date(Date.now() + (60 * 60 * 1000)));
             let to_date = this.isotodate(new Date(new Date().setDate(new Date().getDate() + 1)));
 
@@ -145,7 +149,9 @@ export default {
                 this.$refs.onclickmarker.mapObject.openPopup();
               });
             }).catch(error => {
-              this.errorMsg = '(' + error.response.status + ') ' + error.response.data;
+              if (error.response){
+                this.errorMsg = '(' + error.response.status + ') ' + error.response.data;
+              }
               this.popUpLoading = false;
               this.errorShowing = true;
               this.$nextTick(() => {
@@ -167,5 +173,8 @@ export default {
 </script>
 
 <style>
+.leaflet-popup-content{
+  width: 40vh !important;
+}
 
 </style>

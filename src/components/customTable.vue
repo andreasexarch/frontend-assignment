@@ -11,19 +11,22 @@
             <v-row no-gutters v-for="item in itemsPerPageContent[currentPage]" :key="item.date">
                 <v-col>{{ item.date }}</v-col>
                 <!-- <v-col>{{ item.temp }}</v-col> -->
-                <v-col><v-chip :color="chipColorsTemperature(item.rawData.temp)">{{ item.temp }}</v-chip></v-col>
-                <v-col><v-chip :color="chipColorsHumidity(item.rawData.rh2m)">{{ item.rh2m }}</v-chip></v-col>
+                <v-col><v-chip :color="chipColorsTemperature(item.rawData.temp)" class="mx-4">{{ item.temp }}</v-chip></v-col>
+                <v-col><v-chip :color="chipColorsHumidity(item.rawData.rh2m)" class="mx-4">{{ item.rh2m }}</v-chip></v-col>
             </v-row>
-            <v-divider></v-divider>
+            <v-divider class="mx-4"></v-divider>
             <v-row justify="space-between">
                 <v-col>{{ tableOptions.itemsPerPage + (tableOptions.itemsPerPage * currentPage) }} of {{ items.dataForViewing.items.length }}</v-col>
-                <v-col>
+                <!-- <v-col>
                     <v-btn elevation="1" x-small :disabled="prevBtnDisabled" @click="currentPage--">
                         <v-icon dark>mdi-arrow-left</v-icon>
                     </v-btn>
-                </v-col>
-                <v-col>
-                    <v-btn elevation="1" x-small :disabled="nextBtnDisabled" @click="currentPage++">
+                </v-col> -->
+                <v-col class="d-flex justify-end">
+                    <v-btn elevation="1" x-small :disabled="prevBtnDisabled" @click="currentPage--" class="mx-2">
+                        <v-icon dark>mdi-arrow-left</v-icon>
+                    </v-btn>
+                    <v-btn elevation="1" x-small :disabled="nextBtnDisabled" @click="currentPage++" class="mx-2">
                         <v-icon dark>mdi-arrow-right</v-icon>
                     </v-btn>
                 </v-col>
@@ -55,8 +58,8 @@ export default {
         }],
         itemsPerPageContent: [],
         currentPage: 0,
-        temperatureSortingType: 'none', // values are ['none', 'asc', 'desc']
-        currentSortingValue: null
+        isSortingAscending: true, // values are ['none', 'asc', 'desc']
+        currentSortingValue: 'date'
     }),
     created(){
         this.pagesCount = Math.ceil(this.items.dataForViewing.items.length / this.tableOptions.itemsPerPage);
@@ -67,32 +70,26 @@ export default {
     },
     methods: {
         triggerSorting(valueToSort){
-            this.changeSorting();
-            this.sortItems(valueToSort, this.temperatureSortingType);
+            this.changeSorting(valueToSort);
+            this.sortItems(valueToSort, this.isSortingAscending);
             this.allocateItemsInPages();
         },
-        changeSorting(){
-            switch(this.temperatureSortingType){
-                case 'none':
-                    this.temperatureSortingType = 'asc';
-                    break;
-                case 'asc':
-                    this.temperatureSortingType = 'desc';
-                    break;
-                case 'desc':
-                    this.temperatureSortingType = 'asc';
-                    break;
+        changeSorting(valueToSort){
+            if (valueToSort !== this.currentSortingValue){
+                return;
+            }else{
+                this.isSortingAscending = !this.isSortingAscending;
             }
         },
         sortItems(valueToSort, sortingType){
             if (valueToSort === 'date'){
-                if (sortingType === 'asc'){
+                if (sortingType){
                     this.items.dataForViewing.items.sort((a, b) => Date.parse(a[valueToSort]) - Date.parse(b[valueToSort]));
                 }else{
                     this.items.dataForViewing.items.sort((a, b) => Date.parse(b[valueToSort]) - Date.parse(a[valueToSort]));
                 }
             }else{
-                if (sortingType === 'asc'){
+                if (sortingType){
                     this.items.dataForViewing.items.sort((a, b) => a.rawData[valueToSort] - b.rawData[valueToSort]);
                 }else{
                     this.items.dataForViewing.items.sort((a, b) => b.rawData[valueToSort] - a.rawData[valueToSort]);
@@ -139,7 +136,7 @@ export default {
         },
 
         sortingIcon: function(){
-            if (this.temperatureSortingType === 'asc'){
+            if (this.isSortingAscending){
                 return 'mdi-sort-ascending';
             }else{
                 return 'mdi-sort-descending';

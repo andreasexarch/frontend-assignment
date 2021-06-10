@@ -49,6 +49,9 @@ export class draxisApi{
                 }
             })
         })
+        if (finalDataObj.items.length === 0){
+            throw new Error()
+        }
         return finalDataObj;
     }
 
@@ -235,4 +238,5 @@ export class draxisApi{
             dataForViewing: result
         };
     }
+
 }
