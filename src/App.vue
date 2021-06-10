@@ -39,7 +39,7 @@ export default {
   },
 
   created(){
-    this.api = new draxisApi('4181a631-652a-40a2-a57f-e8338074cc5a', 'https://cors-anywhere.herokuapp.com/');
+    this.api = new draxisApi('4181a631-652a-40a2-a57f-e8338074cc5a', 'http://' + process.env.VUE_APP_NETWORK_IP + ':' + process.env.VUE_APP_NETWORK_PORT + '/');
   },
 
   data: () => ({

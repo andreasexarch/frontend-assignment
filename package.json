@@ -5,13 +5,16 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "test": "node cors_proxy.js & vue-cli-service serve"
   },
   "dependencies": {
     "axios": "^0.21.1",
     "core-js": "^3.6.5",
     "cors-anywhere": "^0.4.4",
     "date.js": "^0.3.3",
+    "dotenv": "^10.0.0",
+    "http-proxy-middleware": "^2.0.0",
     "leaflet": "^1.7.1",
     "vue": "^2.6.11",
     "vue2-leaflet": "^2.7.0",

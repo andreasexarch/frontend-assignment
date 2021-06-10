@@ -18,8 +18,9 @@ npm install
 
 ### Compiles and hot-reloads for development
 ```
-npm run serve
+npm run test
 ```
+Please fill your network ip in .env to bypass CORS (for dev purposes)
 
 ### Compiles and minifies for production
 ```
