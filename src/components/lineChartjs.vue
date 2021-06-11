@@ -41,6 +41,11 @@ export default {
                         backgroundColor: '#418dd9',
                         fill: false,
                         data: []
+                    },{
+                        label: 'Humidity line chart (24hrs)',
+                        backgroundColor: '#41D979',
+                        fill: false,
+                        data: []
                     }
                 ]
           },
@@ -55,6 +60,7 @@ export default {
     this.getData.dataForViewing.items.forEach(item => {
         this.chartData.labels.push(item.date);
         this.chartData.datasets[0].data.push(item.rawData.temp);
+        this.chartData.datasets[1].data.push(item.rawData.rh2m);
     })
 
     this.renderChart(this.chartData, this.chartOptions)
