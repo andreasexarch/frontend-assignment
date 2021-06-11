@@ -37,7 +37,18 @@ export class draxisApi{
             items: [],
             lineChartData: Object.values(data.temperature2m.data)
         };
-        Object.keys(data.temperature2m.data).forEach(header => {
+        let valueToIterate = null;
+        Object.keys(data).forEach(key => {
+            if (Object.keys(data[key].data).length > 0){
+                valueToIterate = key;
+            }
+        });
+
+        if (valueToIterate === null){
+            throw new Error()
+        }
+
+        Object.keys(data[valueToIterate].data).forEach(header => {
             let timeObj = new Date(Date.parse(header.slice(0, header.indexOf('+'))));
             finalDataObj.items.push({
                 date: timeObj.toDateString() + ' ' + timeObj.getHours() + ':00',
@@ -49,9 +60,6 @@ export class draxisApi{
                 }
             })
         })
-        if (finalDataObj.items.length === 0){
-            throw new Error()
-        }
         return finalDataObj;
     }
 
