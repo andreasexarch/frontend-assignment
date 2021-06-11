@@ -5,7 +5,7 @@
             :zoom="zoom"
             :center="center"
             :options="mapOptions"
-            style="height: 87%"
+            style="height: 87%; z-index:1;"
             @click="mapClick"
             @update:zoom="zoomUpdate"
             v-resize="onResize"
@@ -14,40 +14,111 @@
                 :url="url"
                 :attribution="attribution"
             />
-            <l-marker v-if="coordsPopup" ref="onclickmarker" :lat-lng="coordsPopup" >
+            <l-marker v-if="coordsPopup" ref="onclickmarker" :lat-lng="coordsPopup" @click="markerClicked($event)">
 
-              <l-popup v-if="popUpLoading" >
+              <!-- <l-popup v-if="popUpLoading" >
                   <v-progress-circular
                     :size="100"
                     indeterminate
                     color="primary"
                     style="width: 100%"
                   ></v-progress-circular>
-                
-                  <!-- <v-progress-linear
-                    indeterminate
-                    color="yellow darken-2"
-                  ></v-progress-linear> -->
-              </l-popup>
+              </l-popup> -->
 
-              <l-popup v-if="errorShowing">
+              <!-- <l-popup v-if="errorShowing">
                 <error-component :errorMsg="errorMsg"></error-component>
-              </l-popup>
+              </l-popup> -->
 
-              <l-popup v-if="currentDataForViewing">
-                <line-chart v-if="Object.keys(currentDataForViewing.rawData.temperature2m.data).length > 0" :getData="currentDataForViewing"/>
+              <!-- <l-popup v-if="currentDataForViewing">
+                <line-chart v-if="Object.keys(currentDataForViewing.rawData.temperature2m.data).length > 0" :getData="currentDataForViewing"/> -->
                 <!-- <custom-spark-line-component v-if="currentDataForViewing" :chartData="currentDataForViewing.dataForViewing.lineChartData"></custom-spark-line-component> -->
-                <custom-table :items="currentDataForViewing" :tableOptions="{ itemsPerPage: 4 }"></custom-table>
-              </l-popup>
+                <!-- <custom-table :items="currentDataForViewing" :tableOptions="{ itemsPerPage: 4 }"></custom-table>
+              </l-popup> -->
 
             </l-marker>
         </l-map>
+            <!-- Loading data dialog START -->
+            <v-dialog
+              v-model="popUpLoading"
+              hide-overlay
+              persistent
+              width="300"
+            >
+              <v-card
+                color="primary"
+                dark
+              >
+                <v-card-text>
+                  Loading data..
+                  <v-progress-linear
+                    indeterminate
+                    color="white"
+                    class="mb-0"
+                  ></v-progress-linear>
+                </v-card-text>
+              </v-card>
+            </v-dialog>
+            <!-- Loading data dialog END -->
+
+            <!-- Data dialog START -->
+            <v-dialog
+              v-model="dialogShowing"
+              style="z-index:2;"
+              width="40vh"
+            >
+              <v-card v-if="dialogShowing"
+                elevation="5"
+                outlined
+              >
+
+                <line-chart v-if="Object.keys(currentDataForViewing.rawData.temperature2m.data).length > 0" :getData="currentDataForViewing"/>
+                <!-- <custom-spark-line-component v-if="currentDataForViewing" :chartData="currentDataForViewing.dataForViewing.lineChartData"></custom-spark-line-component> -->
+                <custom-table :items="currentDataForViewing" :tableOptions="{ itemsPerPage: 4 }"></custom-table>
+
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn
+                    color="primary"
+                    text
+                    @click="dialogShowing = false">
+                    Ok
+                  </v-btn>
+                  <v-spacer></v-spacer>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+            <!-- Data dialog END -->
+
+            <!-- Error dialog START -->
+            <v-dialog
+              v-model="errorShowing"
+              hide-overlay
+              width="300"
+            >
+              <v-card
+                elevation="5"
+                outlined
+              >
+                  <error-component :errorMsg="errorMsg"></error-component>
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                      color="primary"
+                      text
+                      @click="errorShowing = false">
+                      Ok
+                    </v-btn>
+                    <v-spacer></v-spacer>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+            <!-- Erro dialog END -->
   </v-container>
 </template>
 
 <script>
 import * as L from 'leaflet';
-import { LMap, LTileLayer, LMarker, LPopup } from 'vue2-leaflet';
+import { LMap, LTileLayer, LMarker } from 'vue2-leaflet';
 // import customSparkLineComponent from './customSparkLineComponent.vue'
 import errorComponent from './errorComponent.vue'
 import customTable from './customTable.vue'
@@ -59,7 +130,7 @@ export default {
         LMap,
         LTileLayer,
         LMarker,
-        LPopup,
+        // LPopup,
         // customSparkLineComponent,
         errorComponent,
         customTable,
@@ -84,6 +155,7 @@ export default {
         currentDataForViewing: null,
         popUpLoading: false,
         errorShowing: false,
+        dialogShowing: false,
         errorMsg: 'Our digital pandas are trying to solve it!',
         mapOptions: {
           zoomSnap: 0.5
@@ -110,6 +182,9 @@ export default {
       this.$store.dispatch('action_set_new_mapObject', this.$refs.mymap)
     },
     methods:{
+        markerClicked(){
+          this.dialogShowing = true;
+        },
         onResize(){
           // this.center = this.coordsPopup;
           if (this.coordsPopup){
@@ -138,18 +213,19 @@ export default {
 
             this.errorShowing = false;
             this.popUpLoading = true;
-            this.$nextTick(() => {
-              this.$refs.onclickmarker.mapObject.openPopup();
-            });
+            // this.$nextTick(() => {
+            //   this.$refs.onclickmarker.mapObject.openPopup();
+            // });
 
             // live api call
             this.api.getWeatherMeteoHourly(objForApi).then((dataResult) => {
               this.popUpLoading = false;
+              this.dialogShowing = true;
               this.currentData = dataResult.rawData;
               this.currentDataForViewing = dataResult;
-              this.$nextTick(() => {
-                this.$refs.onclickmarker.mapObject.openPopup();
-              });
+              // this.$nextTick(() => {
+              //   this.$refs.onclickmarker.mapObject.openPopup();
+              // });
             }).catch(error => {
               if (error.response){
                 this.errorMsg = '(' + error.response.status + ') ' + error.response.data;
