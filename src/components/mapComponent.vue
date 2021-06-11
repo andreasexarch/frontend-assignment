@@ -35,7 +35,8 @@
               </l-popup>
 
               <l-popup v-if="currentDataForViewing">
-                <custom-spark-line-component v-if="currentDataForViewing" :chartData="currentDataForViewing.dataForViewing.lineChartData"></custom-spark-line-component>
+                <line-chart :getData="currentDataForViewing"/>
+                <!-- <custom-spark-line-component v-if="currentDataForViewing" :chartData="currentDataForViewing.dataForViewing.lineChartData"></custom-spark-line-component> -->
                 <custom-table :items="currentDataForViewing" :tableOptions="{ itemsPerPage: 4 }"></custom-table>
               </l-popup>
 
@@ -47,9 +48,10 @@
 <script>
 import * as L from 'leaflet';
 import { LMap, LTileLayer, LMarker, LPopup } from 'vue2-leaflet';
-import customSparkLineComponent from './customSparkLineComponent.vue'
+// import customSparkLineComponent from './customSparkLineComponent.vue'
 import errorComponent from './errorComponent.vue'
 import customTable from './customTable.vue'
+import lineChart from './lineChartjs.vue'
 
 export default {
     name: 'mapComponent',
@@ -58,9 +60,10 @@ export default {
         LTileLayer,
         LMarker,
         LPopup,
-        customSparkLineComponent,
+        // customSparkLineComponent,
         errorComponent,
-        customTable
+        customTable,
+        lineChart
     },
     props: {
       api: {
@@ -69,7 +72,7 @@ export default {
       }
     },
     inject: ['isotodate'],
-    data: function() {
+    data() {
       return {
         zoom: 13,
         currentZoom: 11.5,
@@ -108,7 +111,6 @@ export default {
     },
     methods:{
         onResize(){
-          console.log('resize happens!');
           // this.center = this.coordsPopup;
           if (this.coordsPopup){
             this.$refs.mymap.mapObject.setView(this.coordsPopup, this.currentZoom);
