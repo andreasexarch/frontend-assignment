@@ -35,7 +35,7 @@
               </l-popup>
 
               <l-popup v-if="currentDataForViewing">
-                <line-chart :getData="currentDataForViewing"/>
+                <line-chart v-if="Object.keys(currentDataForViewing.rawData.temperature2m.data).length > 0" :getData="currentDataForViewing"/>
                 <!-- <custom-spark-line-component v-if="currentDataForViewing" :chartData="currentDataForViewing.dataForViewing.lineChartData"></custom-spark-line-component> -->
                 <custom-table :items="currentDataForViewing" :tableOptions="{ itemsPerPage: 4 }"></custom-table>
               </l-popup>
@@ -160,6 +160,7 @@ export default {
                 this.$refs.onclickmarker.mapObject.openPopup();
               });
             });
+
 
             // // mock api call
             // let dataResult = this.api.getMockAnswer(objForApi);
