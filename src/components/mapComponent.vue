@@ -64,18 +64,26 @@
             <v-dialog
               v-model="dialogShowing"
               style="z-index:2;"
+              hide-overlay
               width="40vh"
             >
-              <v-card v-if="dialogShowing"
+              <v-card 
                 elevation="5"
                 outlined
               >
+                <minimal-data-presentation v-if="dialogShowing && minimalDialog" :data="currentDataForViewing" :latlng="coordsPopup"></minimal-data-presentation>
 
-                <line-chart v-if="Object.keys(currentDataForViewing.rawData.temperature2m.data).length > 0" :getData="currentDataForViewing"/>
-                <!-- <custom-spark-line-component v-if="currentDataForViewing" :chartData="currentDataForViewing.dataForViewing.lineChartData"></custom-spark-line-component> -->
-                <custom-table :items="currentDataForViewing" :tableOptions="{ itemsPerPage: 4 }"></custom-table>
+                <div v-if="dialogShowing && !minimalDialog">
+                  <line-chart v-if="Object.keys(currentDataForViewing.rawData.temperature2m.data).length > 0" :getData="currentDataForViewing"/>
+                  <!-- <custom-spark-line-component v-if="currentDataForViewing" :chartData="currentDataForViewing.dataForViewing.lineChartData"></custom-spark-line-component> -->
+                  <custom-table :items="currentDataForViewing" :tableOptions="{ itemsPerPage: 4 }"></custom-table>
+                </div>
 
                 <v-card-actions>
+                  <v-switch
+                    v-model="minimalDialog"
+                    :label="`Minimal form`"
+                  ></v-switch>
                   <v-spacer></v-spacer>
                   <v-btn
                     color="primary"
@@ -83,11 +91,12 @@
                     @click="dialogShowing = false">
                     Ok
                   </v-btn>
-                  <v-spacer></v-spacer>
+                  <!-- <v-spacer></v-spacer> -->
                 </v-card-actions>
               </v-card>
             </v-dialog>
             <!-- Data dialog END -->
+
 
             <!-- Error dialog START -->
             <v-dialog
@@ -123,6 +132,7 @@ import { LMap, LTileLayer, LMarker } from 'vue2-leaflet';
 import errorComponent from './errorComponent.vue'
 import customTable from './customTable.vue'
 import lineChart from './lineChartjs.vue'
+import minimalDataPresentation from './minimalDataPresentation.vue';
 
 export default {
     name: 'mapComponent',
@@ -134,7 +144,8 @@ export default {
         // customSparkLineComponent,
         errorComponent,
         customTable,
-        lineChart
+        lineChart,
+        minimalDataPresentation
     },
     props: {
       api: {
@@ -150,12 +161,12 @@ export default {
         center: L.latLng(40.6401, 22.9444),
         url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
         attribution:'&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-        // coordsPopup: L.latLng(40.6401, 22.9444),
         coordsPopup: null,
         currentDataForViewing: null,
         popUpLoading: false,
         errorShowing: false,
         dialogShowing: false,
+        minimalDialog: false,
         errorMsg: 'Our digital pandas are trying to solve it!',
         mapOptions: {
           zoomSnap: 0.5
