@@ -80,10 +80,10 @@
                 </div>
 
                 <v-card-actions>
-                  <v-switch
+                  <!-- <v-switch
                     v-model="minimalDialog"
                     :label="`Minimal form`"
-                  ></v-switch>
+                  ></v-switch> -->
                   <v-spacer></v-spacer>
                   <v-btn
                     color="primary"
@@ -91,7 +91,7 @@
                     @click="dialogShowing = false">
                     Ok
                   </v-btn>
-                  <!-- <v-spacer></v-spacer> -->
+                  <v-spacer></v-spacer>
                 </v-card-actions>
               </v-card>
             </v-dialog>
